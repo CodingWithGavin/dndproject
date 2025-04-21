@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <img src="{{ url_for('static', filename='images/rolinitiative.jpg') }}" alt="Rol Initiative" style="height: 40px; width: 40px; ">
+            <a class="navbar-brand" href="#" id="navbarTitle">Rollies</a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="inventory.html">Test nav button</a>
+                      </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<div class="row g-1">
+    <div class="col-2">
+    <!-- Dice Roller Section -->
+        <h3 class="mt-4">🎲 Roll the Dice!</h3>
+        <div id="dice-display" class="display-3" width="100">🎲</div>
+        <div id="dice-number" class="display-3">X</div>
+        <button class="btn btn-success mt-2" onclick="rollD6Dice()">Roll Dice</button>
+    </div>
+    <div class="col-2">
+        <h3 class="mt-4">Roll D20!</h3>
+        <img id ="d20-display" src="/static/images/d20_20Start.png" width="100">
+        <div id="d20-number" class="display-3">X</div>
+        <button class="btn btn-success mt-2" onclick="rollD20Dice()">Roll Dice</button>
+    </div>
+
+    <!-- Setup to create a room-->
+    <div class="col-2">
+        <!-- Button to trigger modal -->
+        <button id="create-room-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createRoomModal">
+            Create Room
+        </button>
+    
+        <!-- Bootstrap Modal with Form -->
+        <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- FORM begins here -->
+                    <form action="{{ url_for('create_room') }}" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createRoomModalLabel">Create a Room</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="player-name">Enter your name (Max 10 characters):</label>
+                            <input type="text" id="player-name" name="player_name" class="form-control" maxlength="10" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Room</button>
+                        </div>
+                    </form>
+                    <!-- FORM ends here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Setup to join an existing room -->
+    <div class="col-2">
+        <!-- Button to trigger the Join Room modal -->
+        <button id="join-room-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#joinRoomModal">
+            Join Room
+        </button>
+
+        <!-- Bootstrap Modal for Joining a Room -->
+        <div class="modal fade" id="joinRoomModal" tabindex="-1" aria-labelledby="joinRoomModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- FORM begins here -->
+                    <form action="{{ url_for('join_room') }}" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="joinRoomModalLabel">Join an Existing Room</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Room Code -->
+                            <div class="mb-3">
+                                <label for="room_code" class="form-label">Room Code</label>
+                                <input type="text" class="form-control" id="room_code" name="room_code" required>
+                            </div>
+
+                            <!-- Player Name -->
+                            <div class="mb-3">
+                                <label for="player_name" class="form-label">Player Name</label>
+                                <input type="text" class="form-control" id="player_name" name="player_name" required>
+                            </div>
+
+                            <!-- Initiative Count -->
+                            <div class="mb-3">
+                                <label for="initiative_count" class="form-label">Initiative Count</label>
+                                <input type="number" class="form-control" id="initiative_count" name="initiative_count" required>
+                            </div>
+
+                            <!-- Hit Points -->
+                            <div class="mb-3">
+                                <label for="hit_points" class="form-label">Hit Points</label>
+                                <input type="number" class="form-control" id="hit_points" name="hit_points" required>
+                            </div>
+
+                            <!-- Armor Class -->
+                            <div class="mb-3">
+                                <label for="ac" class="form-label">Armor Class (AC)</label>
+                                <input type="number" class="form-control" id="ac" name="ac" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Join Room</button>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+    <!--Our Scripts and Dependacies-->
+    <script src="https://cdn.jsdelivr.net/npm/aws-sdk@2.1312.0/dist/aws-sdk.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</body>
+</html>
