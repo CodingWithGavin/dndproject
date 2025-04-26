@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Full API Response:", data);
     
             // Save player details to localStorage
+            localStorage.setItem('room_id', data.room_id);
             localStorage.setItem('player_id', data.player_id);
             localStorage.setItem('player_name', data.player_name);
             localStorage.setItem('initiative_count', data.initiative_count);
