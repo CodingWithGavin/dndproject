@@ -16,6 +16,8 @@ console.log("Player ID:", playerId);
 console.log("Player Type:", playerType);
 
 // Establish WebSocket for live updates
+// socket needs to be a local varibale so the other fucntions can call this and cant be a constant
+// incase the users change to a new room and need to reinitialise the connection
 let socket;
 
 
@@ -32,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch initial room details
+    updatePermissions()
     getRoomDetails(roomCode);
     getPlayersByRoom(roomCode);
 });
@@ -65,19 +68,13 @@ function connectSocket(roomCode, playerId) {
                 console.log("🔄 Data refresh requested");
                 getRoomDetails(roomCode);
                 getPlayersByRoom(roomCode);
+                updatePermissions();
                 break;
-           //case "turnUpdate":
-           //    console.log("🌀 Turn update received");
-           //    updateTurnState();
-           //    break;
-           //case "newPlayerJoined":
-           //    console.log("👥 New player joined");
-           //    addNewPlayerToRoom(message.playerId);
-           //    break;
-           //case "gameStarted":
-           //    console.log("🎮 Game started");
-           //    startGame();
-           //    break;
+          //case "turnUpdate":
+          //     console.log("🌀 Turn update received");
+          //     getRoomDetails(roomCode);
+          //     getPlayersByRoom(roomCode);
+          //     break;
             default:
                 console.log("⚠️ Unrecognized action:", message.action);
         }
@@ -109,6 +106,9 @@ async function getRoomDetails(roomCode) {
         console.log('Room data:', data);
 
         updateRoomDetails(data)
+        // we do this so we can get the current turn as is for our other functionality 
+        // of updating whos current turn it is, we could edit this in the future to pass in more roomdata if needed
+        return data.current_turn;
 
     } catch (error) {
         console.error('Error fetching room details:', error);
@@ -132,8 +132,10 @@ async function getPlayersByRoom(roomCode) {
         const playersData = await response.json();
         console.log('Players data:', playersData);
 
+        //using this so we can get the current turn 
+        const currentTurn = await getRoomDetails(roomCode);
         // Update the UI with player information
-        updatePlayerDetails(playersData);
+        updatePlayerDetails(playersData, currentTurn);
 
     } catch (error) {
         console.error('Error fetching players data:', error);
@@ -152,13 +154,21 @@ function updateRoomDetails(roomData) {
 }
 
 // Function to update player details in the DOM
-function updatePlayerDetails(players) {
+function updatePlayerDetails(players, currentTurn) {
     const tableBody = document.getElementById('playerTableBody');
     tableBody.innerHTML = ''; // Clear old data
-  
-    players.forEach(player => {
+
+    players.sort((a, b) => b.initiative_count - a.initiative_count);
+
+    players.forEach((player, index) => {
       const row = document.createElement('tr');
-  
+
+      if(index + 1 === currentTurn){
+        row.classList.add("table-success");
+      }
+
+      
+
       row.innerHTML = `
         <td class="col-1">${player.initiative_count}</td>
         <td class="col-2">${player.player_name}</td>
@@ -171,7 +181,7 @@ function updatePlayerDetails(players) {
     });
   }
 
-
+//sends a ping to the websocket which will activate specific actions
   async function sendPing(sendingmessage, sendingaction) {
     const roomCode = localStorage.getItem("room_id");
 
@@ -195,3 +205,120 @@ function updatePlayerDetails(players) {
     }
 }
 
+async function endTurn() {
+    const roomCode = localStorage.getItem("room_id");
+    try {
+        const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}/turn`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+
+        });
+
+        const result = await response.json();
+        console.log("✅ Turn ended:", result);
+        sendPing('Turn ended', 'dataRefresh');
+    } catch (error) {
+        console.error("❌ Error ending turn:", error);
+    }
+}
+
+//This functions not needed anymore as the endturn lambda was editing to account for the current exceeding the amount of players
+//Once this happens the lambda then invoked the end round function
+//async function endRound() {
+//   const roomCode = localStorage.getItem("room_id");
+//   try {
+//       const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}/round`, {
+//           method: "POST",
+//           headers: {
+//               "Content-Type": "application/json"
+//           }
+//
+//       });
+//
+//       const result = await response.json();
+//       console.log("✅ Round ended:", result);
+//       sendPing('Turn ended', 'dataRefresh');
+//   } catch (error) {
+//       console.error("❌ Error ending turn:", error);
+//   }
+//
+
+
+
+
+// we needed to create a function to get find if the player entered is their turn so we could then use the apply permissions functions below 
+//
+async function isItMyTurn(playerId, playerType) {
+    const roomCode = localStorage.getItem("room_id");
+
+    try {
+        // Fetch latest room info
+        const roomResponse = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}`);
+        const roomData = await roomResponse.json();
+        const currentTurn = roomData.current_turn;
+
+        // Fetch latest players info
+        const playersResponse = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}/players`);
+        const playersData = await playersResponse.json();
+
+        const orderedPlayers = playersData.sort((a, b) => b.initiative_count - a.initiative_count)
+
+        if(orderedPlayers.length === 1 ){
+            console.log("You need more players")
+            return true;
+        }
+         const currentPlayer = orderedPlayers[currentTurn - 1];
+         console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
+         return currentPlayer.id === playerId || playerType.toLowerCase() === "dm"
+         
+    } catch (error) {
+        console.error("❌ Something Wrong with players turn:", error);
+        return false;
+    }
+}
+
+//Here we will be setting up permissions for frontend buttons and features only available when meeting
+//certain criteria like if its your turn or if you are the dm 
+
+//first  a function to update our permissions
+async function updatePermissions() {
+    const playerId = localStorage.getItem('player_id');
+    const playerType = localStorage.getItem('player_type'); // 'Player' or 'DM'
+
+    const permissions = {
+        canEndTurn: false,
+        //canKickPlayers: false,
+        //canEditRoomSettings: false,
+    };
+    console.log("Permission Chat Information: ", playerId, playerType)
+    const isMyTurn = await isItMyTurn(playerId, playerType);
+
+    if (isMyTurn) {
+        permissions.canEndTurn = true;
+    }
+
+    applyPermissions(permissions);
+}
+
+// function to apply the permissions
+function applyPermissions(permissions) {
+    const endTurnButton = document.getElementById("end-turn-button");
+    //const kickPlayerButton = document.getElementById("kick-player-button");
+    //const roomSettingsButton = document.getElementById("room-settings-button");
+
+    if (permissions.canEndTurn) {
+        endTurnButton.style.display = "block";
+    } else {
+        endTurnButton.style.display = "none";
+    }
+
+    //if (kickPlayerButton) {
+    //    kickPlayerButton.style.display = permissions.canKickPlayers ? "block" : "none";
+    //}
+//
+    //if (roomSettingsButton) {
+    //    roomSettingsButton.style.display = permissions.canEditRoomSettings ? "block" : "none";
+    //}
+}
