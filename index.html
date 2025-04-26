@@ -37,7 +37,7 @@
 
         <div class="container mt-5">
             <h1 class="text-center mb-4">Welcome to D&D Room</h1>
-        
+            <div id="roomResult" class="mt-3"></div>
             <div class="d-grid gap-3 col-6 mx-auto">
         
               <!-- Create Room Button -->
@@ -71,6 +71,8 @@
           </form>
         </div>
       </div>
+
+      
   
       <!-- Join Room Form -->
       <div class="collapse mt-4" id="joinRoomForm">
@@ -85,16 +87,16 @@
               <input type="text" class="form-control" id="playerName" name="player_name" required>
             </div>
             <div class="mb-3">
-                <label for="playerName" class="form-label">Initiative</label>
-                <input type="text" class="form-control" id="playerName" name="player_name" required>
+                <label for="initiativeCount" class="form-label">Initiative</label>
+                <input type="number" class="form-control" id="initiativeCount" name="initiative_count" required>
             </div>
             <div class="mb-3">
-                <label for="playerName" class="form-label">Hit Points</label>
-                <input type="text" class="form-control" id="playerName" name="player_name" required>
+                <label for="hitPointCount" class="form-label">Hit Points</label>
+                <input type="number" class="form-control" id="hitPointCount" name="hit_point_count" required>
             </div>
             <div class="mb-3">
-                <label for="playerName" class="form-label">Armor Class (AC)</label>
-                <input type="text" class="form-control" id="playerName" name="player_name" required>
+                <label for="armorClass" class="form-label">Armor Class (AC)</label>
+                <input type="number" class="form-control" id="armorClass" name="AC" required>
             </div>
             <div class="text-center">
                 <button  type="submit" class="btn btn-success">Join Room</button>

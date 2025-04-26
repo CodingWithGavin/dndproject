@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <img src="/static/images/rolinitiative.jpg"  alt="Rol Initiative" style="height: 40px; width: 40px; ">
+            <a class="navbar-brand" href="#" id="navbarTitle">Rollies</a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a >Test nav button</a>
+                      </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <h1 id="roomTitle">Room Code: <span id="room-id"></span></h1>
+
+
+    <button onclick="sendPing('refresh player list', 'dataRefresh')">Send Ping</button>
+
+    <div class="container mt-3">
+
+        <div class="row g-3">
+
+            <!-- Room Info -->
+            <div class="col-md-2">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="mb-3">Room Info</h5>
+                    <p class="mb-4"><strong>Session Start Time:</strong> <span id="session-start-time"></span></p>
+                    <p class="mb-2"><strong>Round Count:</strong> <span id="round-count"></span></p>
+                    <p class="mb-2"><strong>Current Turn:</strong> <span id="current-turn"></span></p>
+                    <p class="mb-0"><strong>Room Status:</strong> <span id="room-status"></span></p>
+                </div>
+            </div>
+
+            <!-- Player Table -->
+            <div class="col-md-6">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="mb-3">Players</h5>
+                    <table id="playerTable" class="table table-striped table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th class="col-2">Initiative</th>
+                                <th class="col-4">Player Name</th>
+                                <th class="col-2">HP</th>
+                                <th class="col-2">AC</th>
+                                <th class="col-4">Player Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playerTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Our Scripts and Dependacies-->
+    <script src="https://cdn.jsdelivr.net/npm/aws-sdk@2.1312.0/dist/aws-sdk.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <script src="static/js/websocket.js"></script> -->
+    <script src="static/js/dice.js"></script>
+    <!--<script src="static/js/formControl.js"></script> -->
+    <!-- <script src="static/js/main.js"></script> -->
+    <script src="static/js/room.js"></script>
+</body>
+</html>
