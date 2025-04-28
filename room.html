@@ -61,8 +61,52 @@
 
                 </div>
             </div>
+
+            <!-- Bootstrap Modal for Editing Player -->
+            <div class="modal fade" id="editPlayerModal" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editPlayerModalLabel">Edit Player</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Form to edit player data -->
+                            <form id="edit-player-form">
+                                <div>
+                                    <input type="hidden" id="edit-player-id" name="player_id">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-player-name" class="form-label">Player Name</label>
+                                    <input type="text" class="form-control" id="edit-player-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-player-initiative" class="form-label">Player Initiative</label>
+                                    <input type="number" class="form-control" id="edit-player-initiative" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-player-hp" class="form-label">HP</label>
+                                    <input type="number" class="form-control" id="edit-player-hp" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-player-ac" class="form-label">AC</label>
+                                    <input type="number" class="form-control" id="edit-player-ac" required>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="submitEditPlayerBtn">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button id="kickPlayerBtn" class="btn btn-danger">Kick Player</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+
+
+
 
     <!--Our Scripts and Dependacies-->
     <script src="https://cdn.jsdelivr.net/npm/aws-sdk@2.1312.0/dist/aws-sdk.min.js"></script>

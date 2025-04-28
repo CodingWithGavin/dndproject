@@ -53,6 +53,13 @@ function connectSocket(roomCode, playerId) {
         console.log("🔌 WebSocket connection opened");
 
         socket.send(JSON.stringify({ action: "joinRoom", roomCode, playerId }));
+        // Start sending a ping every 30 seconds to keep the connection going if its left idol 
+        setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'ping' }));
+            console.log('Sent ping to keep connection alive');
+            }
+        }, 30000);
     };
 
     socket.onmessage = (event) => {
@@ -132,6 +139,8 @@ async function getPlayersByRoom(roomCode) {
         const playersData = await response.json();
         console.log('Players data:', playersData);
 
+        //scan to see if player needs to be kicked
+        kickscan(playersData) //needs work its kicking everyone 
         //using this so we can get the current turn 
         const currentTurn = await getRoomDetails(roomCode);
         // Update the UI with player information
@@ -155,31 +164,145 @@ function updateRoomDetails(roomData) {
 
 // Function to update player details in the DOM
 function updatePlayerDetails(players, currentTurn) {
-    const tableBody = document.getElementById('playerTableBody');
-    tableBody.innerHTML = ''; // Clear old data
+        const tableBody = document.getElementById('playerTableBody');
+        tableBody.innerHTML = ''; // Clear old data
 
-    players.sort((a, b) => b.initiative_count - a.initiative_count);
+        players.sort((a, b) => b.initiative_count - a.initiative_count);
 
-    players.forEach((player, index) => {
-      const row = document.createElement('tr');
+        players.forEach((player, index) => {
+        const row = document.createElement('tr');
 
-      if(index + 1 === currentTurn){
-        row.classList.add("table-success");
-      }
+        if(index + 1 === currentTurn){
+            row.classList.add("table-success");
+        }
 
-      
+        row.dataset.player = JSON.stringify(player);
 
-      row.innerHTML = `
-        <td class="col-1">${player.initiative_count}</td>
-        <td class="col-2">${player.player_name}</td>
-        <td class="col-1">${player.hit_point_count !== undefined && player.hit_point_count !== null ? player.hit_point_count : '~'}</td>
-        <td class="col-1">${player.AC !== undefined && player.AC !== null ? player.AC : '~'}</td>
-        <td class="col-3">${player.player_type}</td>
-      `;
-  
-      tableBody.appendChild(row);
+        row.addEventListener('click', function() {
+            openPlayerOptions(this.dataset.player);
+        });
+
+        row.innerHTML = `
+            <td class="col-1">${player.initiative_count}</td>
+            <td class="col-2">${player.player_name}</td>
+            <td class="col-1">${player.hit_point_count !== undefined && player.hit_point_count !== null ? player.hit_point_count : '~'}</td>
+            <td class="col-1">${player.AC !== undefined && player.AC !== null ? player.AC : '~'}</td>
+            <td class="col-3">${player.player_type}</td>
+        `;
+    
+        tableBody.appendChild(row);
     });
   }
+
+// Function to open the player options modal
+function openPlayerOptions(playerData) {
+    const player = JSON.parse(playerData);  // Get player info from the data attribute
+    
+    // Filling in our form fields
+    document.getElementById('edit-player-id').value = player.id;
+    document.getElementById('edit-player-name').value = player.player_name;
+    document.getElementById('edit-player-initiative').value = player.initiative_count;
+    document.getElementById('edit-player-hp').value = player.hit_point_count;
+    document.getElementById('edit-player-ac').value = player.AC;
+
+    // Show the Bootstrap modal
+    const myModalElement = document.getElementById('editPlayerModal');
+    const myModal = new bootstrap.Modal(myModalElement);
+    myModal.show();
+    // We needed to set up a timer here because the event listeners needs to come after the modal has been shown
+    setTimeout(() => {
+        const submitButton = document.getElementById('submitEditPlayerBtn');
+        const kickButton = document.getElementById('kickPlayerBtn');
+        if (submitButton) {
+            submitButton.addEventListener('click', function() {
+                submitEditPlayer(player.id, myModal); //We passed in the players id and the modal to ensure the correct one is being referenced 
+            }, {once: true});
+        } else {
+            console.error('Submit button not found!');
+        }
+
+        if (kickButton) {
+            kickButton.addEventListener('click', function() {
+                kickPlayer(player.id, myModal); 
+            }, {once: true});
+        } else {
+            console.error('Kick button not found!');
+        }
+
+    }, 300); 
+}
+
+
+async function submitEditPlayer(playerId, myModal) {
+    // Prevent default form submission behavior
+    event.preventDefault();
+
+    const updatedData = {
+        playerId: playerId,
+        player_name: document.getElementById('edit-player-name').value,
+        initiative_count: parseInt(document.getElementById('edit-player-initiative').value),
+        hit_point_count: parseInt(document.getElementById('edit-player-hp').value),
+        AC: parseInt(document.getElementById('edit-player-ac').value),
+        player_type: "player" 
+    };
+
+    try {
+        const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/players/${updatedData.playerId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (response.ok) {
+            alert('Player updated!');
+
+            //We complete our ping and then close out the modal
+            sendPing('PlayerUpdated', 'dataRefresh');
+            myModal.hide(); 
+        } else {
+            alert('Failed to update player');
+        }
+    } catch (error) {
+        console.error('Error updating player:', error);
+    }
+}
+
+
+async function kickPlayer(playerId, myModal) {
+    event.preventDefault();
+    console.log("Player being deleted", playerId)
+    if (confirm('Are you sure you want to kick this player?')) {
+        try {
+            const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/players/${playerId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (response.ok) {
+                alert('Player kicked!');
+                myModal.hide(); 
+                sendPing('PlayerUpdated', 'dataRefresh');
+            } else {
+                alert('Failed to kick player');
+            }
+        } catch (error) {
+            console.error('Error kicking player:', error);
+        }
+    }
+}
+
+function kickscan(players){
+    const currentPlayerId = localStorage.getItem('player_id');
+    const playerExists = players.some(player => player.id === currentPlayerId);
+
+    if (!playerExists) {
+        // If player is not found in the room, clear localStorage and redirect to main page
+        console.log('Player is not in the room, redirecting...');
+        localStorage.clear();
+        window.location.href = '/';  // Redirect to the main page (index.html)
+    } 
+    
+}
 
 //sends a ping to the websocket which will activate specific actions
   async function sendPing(sendingmessage, sendingaction) {
