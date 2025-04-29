@@ -1,7 +1,7 @@
 // Establishing our local variables which are key for future functions 
 console.log("🔍 Checking localStorage values on room.html");
 
-// Retrieve from localStorage
+// Retrieve from localStorage, very important as these are needed for a varaibel of functions, do not overwrite carelessly!
 const roomId = localStorage.getItem('room_id');
 const playerName = localStorage.getItem('player_name');
 const initiativeCount = localStorage.getItem('initiative_count');
@@ -22,21 +22,21 @@ let socket;
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = localStorage.getItem("room_id");
     const playerId = localStorage.getItem("player_id");
 
     if (roomCode && playerId) {
         connectSocket(roomCode, playerId); // Establish WebSocket connection
         sendPing('refresh player list', 'dataRefresh');
+        
+        await new Promise(resolve => setTimeout(resolve, 200));  // wait 200ms
+        updatePermissions();
+        await getRoomDetails(roomCode);
+        await getPlayersByRoom(roomCode);
     } else {
         console.warn("Missing roomCode or playerId. WebSocket not started.");
     }
-
-    // Fetch initial room details
-    updatePermissions()
-    getRoomDetails(roomCode);
-    getPlayersByRoom(roomCode);
 });
 
 // Function to establish a WebSocket connection
@@ -140,7 +140,7 @@ async function getPlayersByRoom(roomCode) {
         console.log('Players data:', playersData);
 
         //scan to see if player needs to be kicked
-        kickscan(playersData) //needs work its kicking everyone 
+        kickscan(playersData)  
         //using this so we can get the current turn 
         const currentTurn = await getRoomDetails(roomCode);
         // Update the UI with player information
@@ -179,7 +179,13 @@ function updatePlayerDetails(players, currentTurn) {
         row.dataset.player = JSON.stringify(player);
 
         row.addEventListener('click', function() {
-            openPlayerOptions(this.dataset.player);
+            const playerType = localStorage.getItem('player_type'); // 'DM' or 'Player'
+    
+            if (playerType === 'DM') {
+                openPlayerOptions(this.dataset.player);
+            } else {
+                showToast("Only the DM can manage players."); 
+            }
         });
 
         row.innerHTML = `
@@ -369,11 +375,17 @@ async function endTurn() {
 //
 
 
-
+//We make a seperate check for if we are the dm 
+// its a simple check that compared the local storage for the moment , 
+// //we could change if the future for checkign if their id matches the id of the player in the dbd assocaited with this room
+// but this might be overly complex
+function amITheDM() {
+    return playerType === "DM" ;
+}
 
 // we needed to create a function to get find if the player entered is their turn so we could then use the apply permissions functions below 
 //
-async function isItMyTurn(playerId, playerType) {
+async function isItMyTurn(playerId) {
     const roomCode = localStorage.getItem("room_id");
 
     try {
@@ -394,7 +406,7 @@ async function isItMyTurn(playerId, playerType) {
         }
          const currentPlayer = orderedPlayers[currentTurn - 1];
          console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
-         return currentPlayer.id === playerId || playerType.toLowerCase() === "dm"
+         return currentPlayer.id === playerId
          
     } catch (error) {
         console.error("❌ Something Wrong with players turn:", error);
@@ -412,22 +424,27 @@ async function updatePermissions() {
 
     const permissions = {
         canEndTurn: false,
-        //canKickPlayers: false,
+        canEditAndKickPlayers: false,
         //canEditRoomSettings: false,
     };
-    console.log("Permission Chat Information: ", playerId, playerType)
+    console.log("Permission Chat Information: ", playerId, playerType);
     const isMyTurn = await isItMyTurn(playerId, playerType);
+    
 
-    if (isMyTurn) {
+    if (isMyTurn || amITheDM()) {
         permissions.canEndTurn = true;
     }
-
+    if(amITheDM()){
+        permissions.canEditAndKickPlayers  = true;
+    }
     applyPermissions(permissions);
 }
 
 // function to apply the permissions
 function applyPermissions(permissions) {
     const endTurnButton = document.getElementById("end-turn-button");
+    const editanddeletemodal = document.getElementById("editPlayerModal");
+    const bootstrapModal = new bootstrap.Modal(editanddeletemodal);
     //const kickPlayerButton = document.getElementById("kick-player-button");
     //const roomSettingsButton = document.getElementById("room-settings-button");
 
@@ -435,6 +452,12 @@ function applyPermissions(permissions) {
         endTurnButton.style.display = "block";
     } else {
         endTurnButton.style.display = "none";
+    }
+
+    if(permissions.canEditAndKickPlayers) {
+        bootstrapModal.show(); // Show the modal if the permission is granted
+    } else {
+        bootstrapModal.hide(); // Hide the modal if the permission is denied
     }
 
     //if (kickPlayerButton) {
