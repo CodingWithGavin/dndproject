@@ -334,10 +334,10 @@ function kickscan(players){
     }
 }
 
-async function endTurn() {
+async function endTurn(increment) {
     const roomCode = localStorage.getItem("room_id");
     try {
-        const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}/turn`, {
+        const response = await fetch(`https://29v468q4h6.execute-api.eu-west-1.amazonaws.com/dev/room/${roomCode}/turn?increment=${increment}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -443,6 +443,7 @@ async function updatePermissions() {
 // function to apply the permissions
 function applyPermissions(permissions) {
     const endTurnButton = document.getElementById("end-turn-button");
+    const reverseTurnButton = document.getElementById("reverse-turn-button");
     const editanddeletemodal = document.getElementById("editPlayerModal");
     const bootstrapModal = new bootstrap.Modal(editanddeletemodal);
     //const kickPlayerButton = document.getElementById("kick-player-button");
@@ -450,14 +451,16 @@ function applyPermissions(permissions) {
 
     if (permissions.canEndTurn) {
         endTurnButton.style.display = "block";
+        
     } else {
         endTurnButton.style.display = "none";
     }
 
-    if(permissions.canEditAndKickPlayers) {
-        bootstrapModal.show(); // Show the modal if the permission is granted
-    } else {
-        bootstrapModal.hide(); // Hide the modal if the permission is denied
+    if(!permissions.canEditAndKickPlayers) {
+        bootstrapModal.hide();
+        reverseTurnButton.style.display = "none";
+    }else{
+        reverseTurnButton.style.display = "block";
     }
 
     //if (kickPlayerButton) {
