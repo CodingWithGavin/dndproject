@@ -198,14 +198,20 @@ document.getElementById('playerTableBody').addEventListener('click', function(ev
         const playerType = localStorage.getItem('player_type');
 
         if (playerType === 'DM') {
-            const playerSelected = JSON.parse(row.dataset.player); // parse the data back to object
-            console.log("Selected Player:", playerSelected);
-            openPlayerOptions(playerSelected);
+            try {
+                let playerSelected = JSON.parse(row.dataset.player); // Properly parse JSON string
+                console.log("Selected Player:", playerSelected);
+                openPlayerOptions(playerSelected);
+            } catch (err) {
+                console.error("Failed to parse player data:", row.dataset.player, err);
+                showToast("An error occurred reading the player data.");
+            }
         } else {
             showToast("Only the DM can manage players.");
         }
     }
 });
+
 
 
 
