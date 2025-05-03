@@ -21,7 +21,7 @@ console.log("Player Type:", playerType);
 let socket;
 
 let selectedPlayer = null;
-let alertSound = new Audio('/static/SFX/NotificationAlert.wav');
+let alertSound = new Audio('/static/sfx/NotificationAlert.wav');
 
 
 document.addEventListener('DOMContentLoaded', async () => {
