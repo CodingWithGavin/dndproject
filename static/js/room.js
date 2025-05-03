@@ -20,6 +20,7 @@ console.log("Player Type:", playerType);
 // incase the users change to a new room and need to reinitialise the connection
 let socket;
 
+let selectedPlayer = null;
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -217,40 +218,19 @@ document.getElementById('playerTableBody').addEventListener('click', function(ev
 
 // Function to open the player options modal
 function openPlayerOptions(player) {
-    
-    // Filling in our form fields
+    selectedPlayer = player; // Set the globally accessible selected player
+
     document.getElementById('edit-player-id').value = player.id;
     document.getElementById('edit-player-name').value = player.player_name;
     document.getElementById('edit-player-initiative').value = player.initiative_count;
     document.getElementById('edit-player-hp').value = player.hit_point_count;
     document.getElementById('edit-player-ac').value = player.AC;
 
-    // Show the Bootstrap modal
     const myModalElement = document.getElementById('editPlayerModal');
     const myModal = new bootstrap.Modal(myModalElement);
     myModal.show();
-    // We needed to set up a timer here because the event listeners needs to come after the modal has been shown
-    setTimeout(() => {
-        const submitButton = document.getElementById('submitEditPlayerBtn');
-        const kickButton = document.getElementById('kickPlayerBtn');
-        if (submitButton) {
-            submitButton.addEventListener('click', function() {
-                submitEditPlayer(player.id, myModal); //We passed in the players id and the modal to ensure the correct one is being referenced 
-            }, {once: true});
-        } else {
-            console.error('Submit button not found!');
-        }
-
-        if (kickButton) {
-            kickButton.addEventListener('click', function() {
-                kickPlayer(player.id, myModal); 
-            },{once: true});
-        } else {
-            console.error('Kick button not found!');
-        }
-
-    }, 300); 
 }
+
 
 
 async function submitEditPlayer(playerId, myModal) {
@@ -310,6 +290,30 @@ async function kickPlayer(playerId, myModal) {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const submitButton = document.getElementById('submitEditPlayerBtn');
+    const kickButton = document.getElementById('kickPlayerBtn');
+    const modalElement = document.getElementById('editPlayerModal');
+    const myModal = new bootstrap.Modal(modalElement);
+
+    if (submitButton) {
+        submitButton.addEventListener('click', function () {
+            if (selectedPlayer) {
+                submitEditPlayer(selectedPlayer.id, myModal);
+            }
+        });
+    }
+
+    if (kickButton) {
+        kickButton.addEventListener('click', function () {
+            if (selectedPlayer) {
+                kickPlayer(selectedPlayer.id, myModal);
+            }
+        });
+    }
+});
+
 
 function kickscan(players){
     const currentPlayerId = localStorage.getItem('player_id');
