@@ -300,7 +300,7 @@ async function kickPlayer(playerId, myModal) {
 
             if (response.ok) {
                 alert('Player kicked!');
-                myModal.close(); 
+                myModal.hide(); 
                 sendPing('PlayerUpdated', 'dataRefresh');
             } else {
                 alert('Failed to kick player');
