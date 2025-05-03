@@ -21,7 +21,7 @@ console.log("Player Type:", playerType);
 let socket;
 
 let selectedPlayer = null;
-
+let alertSound = new Audio('/static/SFX/NotificationAlert.wav');
 
 document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = localStorage.getItem("room_id");
@@ -423,7 +423,7 @@ async function isItMyTurn(playerId) {
         }
          const currentPlayer = orderedPlayers[currentTurn - 1];
          console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
-         return currentPlayer.id === playerId
+         return currentPlayer.id
          
     } catch (error) {
         console.error("❌ Something Wrong with players turn:", error);
@@ -448,10 +448,13 @@ async function updatePermissions() {
     const isMyTurn = await isItMyTurn(playerId, playerType);
     
 
-    if (isMyTurn || amITheDM()) {
+    if (isMyTurn ) {
         permissions.canEndTurn = true;
+        alertSound.play();
+
     }
     if(amITheDM()){
+        permissions.canEndTurn = true;
         permissions.canEditAndKickPlayers  = true;
     }
     applyPermissions(permissions);
