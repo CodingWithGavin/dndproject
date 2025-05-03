@@ -242,8 +242,7 @@ async function submitEditPlayer(playerId, myModal) {
         player_name: document.getElementById('edit-player-name').value,
         initiative_count: parseInt(document.getElementById('edit-player-initiative').value),
         hit_point_count: parseInt(document.getElementById('edit-player-hp').value),
-        AC: parseInt(document.getElementById('edit-player-ac').value),
-        player_type: "player" 
+        AC: parseInt(document.getElementById('edit-player-ac').value)
     };
 
     try {
