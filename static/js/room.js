@@ -164,33 +164,20 @@ function updateRoomDetails(roomData) {
 
 // Function to update player details in the DOM
 function updatePlayerDetails(players, currentTurn) {
-        const tableBody = document.getElementById('playerTableBody');
-        tableBody.innerHTML = ''; // Clear old data
+    const tableBody = document.getElementById('playerTableBody');
+    tableBody.innerHTML = ''; // Clear old data
 
-        players.sort((a, b) => b.initiative_count - a.initiative_count);
+    players.sort((a, b) => b.initiative_count - a.initiative_count);
 
-        players.forEach((player, index) => {
+    players.forEach((player, index) => {
         const row = document.createElement('tr');
 
-        if(index + 1 === currentTurn){
+        if (index + 1 === currentTurn) {
             row.classList.add("table-success");
         }
 
+        row.classList.add("player-row"); // Add a class to identify rows
         row.dataset.player = JSON.stringify(player);
-        
-        let playerSelected = null;
-        console.log("CHECK CHECK", playerSelected);
-        row.addEventListener('click', function() {
-            const playerType = localStorage.getItem('player_type'); // 'DM' or 'Player'
-    
-            if (playerType === 'DM') {
-                playerSelected = this.dataset.player;
-                console.log("CHECk AFTER NUll", playerSelected);
-                openPlayerOptions(playerSelected);
-            } else {
-                showToast("Only the DM can manage players."); 
-            }
-        });
 
         row.innerHTML = `
             <td class="col-1">${player.initiative_count}</td>
@@ -199,10 +186,28 @@ function updatePlayerDetails(players, currentTurn) {
             <td class="col-1">${player.AC !== undefined && player.AC !== null ? player.AC : '~'}</td>
             <td class="col-3">${player.player_type}</td>
         `;
-    
+
         tableBody.appendChild(row);
     });
-  }
+}
+
+document.getElementById('playerTableBody').addEventListener('click', function(event) {
+    const row = event.target.closest('.player-row');
+
+    if (row) {
+        const playerType = localStorage.getItem('player_type');
+
+        if (playerType === 'DM') {
+            const playerSelected = JSON.parse(row.dataset.player); // parse the data back to object
+            console.log("Selected Player:", playerSelected);
+            openPlayerOptions(playerSelected);
+        } else {
+            showToast("Only the DM can manage players.");
+        }
+    }
+});
+
+
 
 // Function to open the player options modal
 function openPlayerOptions(playerData) {
