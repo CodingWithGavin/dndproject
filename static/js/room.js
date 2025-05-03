@@ -216,8 +216,7 @@ document.getElementById('playerTableBody').addEventListener('click', function(ev
 
 
 // Function to open the player options modal
-function openPlayerOptions(playerData) {
-    const player = JSON.parse(playerData);  // Get player info from the data attribute
+function openPlayerOptions(player) {
     
     // Filling in our form fields
     document.getElementById('edit-player-id').value = player.id;
