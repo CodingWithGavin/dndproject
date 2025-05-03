@@ -222,7 +222,7 @@ function openPlayerOptions(playerData) {
         if (submitButton) {
             submitButton.addEventListener('click', function() {
                 submitEditPlayer(player.id, myModal); //We passed in the players id and the modal to ensure the correct one is being referenced 
-            }, {once: true});
+            },myModal.show(), {once: true});
         } else {
             console.error('Submit button not found!');
         }
