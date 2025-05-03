@@ -423,7 +423,7 @@ async function isItMyTurn(playerId) {
         }
          const currentPlayer = orderedPlayers[currentTurn - 1];
          console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
-         return currentPlayer.id
+         return currentPlayer.id === playerId
          
     } catch (error) {
         console.error("❌ Something Wrong with players turn:", error);
@@ -450,11 +450,8 @@ async function updatePermissions() {
 
     if (isMyTurn || amITheDM()) {
         permissions.canEndTurn = true;
-        
-
     }
     if(amITheDM()){
-        permissions.canEndTurn = true;
         permissions.canEditAndKickPlayers  = true;
     }
     applyPermissions(permissions);
