@@ -178,7 +178,7 @@ function updatePlayerDetails(players, currentTurn) {
 
         row.dataset.player = JSON.stringify(player);
         
-        const playerSelected = null;
+        let playerSelected = null;
         console.log("CHECK CHECK", playerSelected);
         row.addEventListener('click', function() {
             const playerType = localStorage.getItem('player_type'); // 'DM' or 'Player'
