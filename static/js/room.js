@@ -222,7 +222,7 @@ function openPlayerOptions(playerData) {
         if (submitButton) {
             submitButton.addEventListener('click', function() {
                 submitEditPlayer(player.id, myModal); //We passed in the players id and the modal to ensure the correct one is being referenced 
-            },myModal.show(), {once: true});
+            },myModal.close(), {once: true});
         } else {
             console.error('Submit button not found!');
         }
@@ -230,7 +230,7 @@ function openPlayerOptions(playerData) {
         if (kickButton) {
             kickButton.addEventListener('click', function() {
                 kickPlayer(player.id, myModal); 
-            }, {once: true});
+            },myModal.close(), {once: true});
         } else {
             console.error('Kick button not found!');
         }
