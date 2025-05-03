@@ -254,7 +254,7 @@ async function submitEditPlayer(playerId, myModal) {
         });
 
         if (response.ok) {
-            alert('Player updated!');
+           //alert('Player updated!');
 
             //We complete our ping and then close out the modal
             sendPing('PlayerUpdated', 'dataRefresh');
@@ -279,7 +279,7 @@ async function kickPlayer(playerId, myModal) {
             });
 
             if (response.ok) {
-                alert('Player kicked!');
+                //alert('Player kicked!');
                 myModal.hide(); 
                 sendPing('PlayerUpdated', 'dataRefresh');
             } else {
