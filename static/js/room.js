@@ -177,13 +177,15 @@ function updatePlayerDetails(players, currentTurn) {
         }
 
         row.dataset.player = JSON.stringify(player);
-        const playerSelected = null;
         
+        const playerSelected = null;
+        console.log("CHECK CHECK", playerSelected);
         row.addEventListener('click', function() {
             const playerType = localStorage.getItem('player_type'); // 'DM' or 'Player'
     
             if (playerType === 'DM') {
-                playerSelected = this.dataset.player
+                playerSelected = this.dataset.player;
+                console.log("CHECk AFTER NUll", playerSelected);
                 openPlayerOptions(playerSelected);
             } else {
                 showToast("Only the DM can manage players."); 
