@@ -8,6 +8,8 @@ const initiativeCount = localStorage.getItem('initiative_count');
 const playerId = localStorage.getItem('player_id');
 const playerType = localStorage.getItem('player_type');
 
+
+
 // ✅ Use or display them
 console.log("Room ID:", roomId);
 console.log("Player Name:", playerName);
@@ -23,7 +25,7 @@ let socket;
 let selectedPlayer = null;
 
 let alertSound = new Audio('/static/sfx/NotificationAlert.wav');
-let soundUnlocked = false;
+let lastKnownTurn = null; //using to get the laskknown turn for use in function including the use of alert notifications
 
 document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = localStorage.getItem("room_id");
@@ -364,8 +366,10 @@ async function endTurn(increment) {
 
         });
 
+
         const result = await response.json();
         console.log("✅ Turn ended:", result);
+
         sendPing('Turn ended', 'dataRefresh');
     } catch (error) {
         console.error("❌ Error ending turn:", error);
@@ -435,8 +439,14 @@ async function isItMyTurn(playerId) {
         }
          const currentPlayer = orderedPlayers[currentTurn - 1];
          console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
-         if(currentPlayer.id === playerId){
+
+         if (currentPlayer.id === playerId && lastKnownTurn !== currentTurn) {
             alertSound.play();
+            
+        }
+        lastKnownTurn = currentTurn;
+
+         if(currentPlayer.id === playerId){
             return true;
          }
          
