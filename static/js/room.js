@@ -21,8 +21,9 @@ console.log("Player Type:", playerType);
 let socket;
 
 let selectedPlayer = null;
-let alertSound = new Audio('/static/sfx/NotificationAlert.wav');
 
+let alertSound = new Audio('/static/sfx/NotificationAlert.wav');
+let soundUnlocked = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = localStorage.getItem("room_id");
@@ -403,6 +404,16 @@ function amITheDM() {
 
 // we needed to create a function to get find if the player entered is their turn so we could then use the apply permissions functions below 
 //
+
+//Allows the audio to be unlocked and played
+document.addEventListener('click', () => {
+    alertSound.play().then(() => {
+        alertSound.pause();
+        alertSound.currentTime = 0;
+    });
+}, { once: true });
+
+
 async function isItMyTurn(playerId) {
     const roomCode = localStorage.getItem("room_id");
 
