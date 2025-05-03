@@ -21,6 +21,7 @@ console.log("Player Type:", playerType);
 let socket;
 
 let selectedPlayer = null;
+let alertSound = new Audio('/static/SFX/NotificationAlert.wav');
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -423,7 +424,11 @@ async function isItMyTurn(playerId) {
         }
          const currentPlayer = orderedPlayers[currentTurn - 1];
          console.log("Turn check: Current players turn id: ", currentPlayer.id, "Current Turn is :", currentTurn, "Amount of players is", orderedPlayers.length, "Curent player data", orderedPlayers[currentTurn - 1]);
-         return currentPlayer.id === playerId
+         if(currentPlayer.id === playerId){
+            alertSound.play();
+            return true;
+         }
+         
          
     } catch (error) {
         console.error("❌ Something Wrong with players turn:", error);
