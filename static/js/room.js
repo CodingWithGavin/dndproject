@@ -21,7 +21,7 @@ console.log("Player Type:", playerType);
 let socket;
 
 let selectedPlayer = null;
-let alertSound = new Audio('/static/SFX/NotificationAlert.wav');
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const roomCode = localStorage.getItem("room_id");
@@ -448,9 +448,9 @@ async function updatePermissions() {
     const isMyTurn = await isItMyTurn(playerId, playerType);
     
 
-    if (isMyTurn ) {
+    if (isMyTurn || amITheDM()) {
         permissions.canEndTurn = true;
-        alertSound.play();
+        
 
     }
     if(amITheDM()){
