@@ -65,7 +65,24 @@
                     <button id="reverse-turn-button" onclick="endTurn(-1)" class="btn btn-primary">Reverse Turn</button>
                 </div>
             </div>
+                <div class="row g-1">
+                    <div class="col-2">
+                    <!-- Dice Roller Section -->
+                        <h3 class="mt-4">🎲 Roll the Dice!</h3>
+                        <div id="dice-display" class="display-3" width="100">🎲</div>
+                        <div id="dice-number" class="display-3">X</div>
+                        <button class="btn btn-success mt-2" onclick="rollD6Dice()">Roll Dice</button>
+                    </div>
+                    <div class="col-2">
+                        <h3 class="mt-4">Roll D20!</h3>
+                        <img id ="d20-display" src="/static/images/d20_20Start.png" width="100">
+                        <div id="d20-number" class="display-3">X</div>
+                        <button class="btn btn-success mt-2" onclick="rollD20Dice()">Roll Dice</button>
+                    </div>
+                </div>
+            <div>
 
+            </div>
             <!-- Bootstrap Modal for Editing Player -->
             <div class="modal fade" id="editPlayerModal" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
